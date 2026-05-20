@@ -35,11 +35,29 @@ export const getAllTasks = async (req, res) => {
     }
 }
 
-// GET /api/tasks/available — tasks where required_workers > 0
+// GET /api/tasks/available — with search, filter & sort
 export const getAvailableTasks = async (req, res) => {
     try {
-        const tasks = await Task.find({ required_workers: { $gt: 0 } })
-            .sort({ createdAt: -1 })
+        const { search, minPay, maxPay, sortBy = 'createdAt' } = req.query
+        const query = { required_workers: { $gt: 0 } }
+
+        if (search) {
+            query.$or = [
+                { task_title: { $regex: search, $options: 'i' } },
+                { Buyer_name: { $regex: search, $options: 'i' } },
+            ]
+        }
+        if (minPay) query.payable_amount = { ...query.payable_amount, $gte: Number(minPay) }
+        if (maxPay) query.payable_amount = { ...query.payable_amount, $lte: Number(maxPay) }
+
+        const sortMap = {
+            createdAt: { createdAt: -1 },
+            payable_amount: { payable_amount: -1 },
+            deadline: { completion_date: 1 },
+        }
+        const sort = sortMap[sortBy] || sortMap.createdAt
+
+        const tasks = await Task.find(query).sort(sort)
         res.json(tasks)
     } catch (err) {
         res.status(500).json({ message: err.message })
