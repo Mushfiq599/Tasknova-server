@@ -7,7 +7,6 @@ export const createTask = async (req, res) => {
         const { Buyer_email, required_workers, payable_amount } = req.body
         const totalCost = required_workers * payable_amount
 
-        // Deduct coins from buyer
         const buyer = await User.findOne({ email: Buyer_email })
         if (!buyer) return res.status(404).json({ message: 'Buyer not found' })
         if (buyer.coins < totalCost)
@@ -51,9 +50,9 @@ export const getAvailableTasks = async (req, res) => {
         if (maxPay) query.payable_amount = { ...query.payable_amount, $lte: Number(maxPay) }
 
         const sortMap = {
-            createdAt: { createdAt: -1 },
+            createdAt:      { createdAt: -1 },
             payable_amount: { payable_amount: -1 },
-            deadline: { completion_date: 1 },
+            deadline:       { completion_date: 1 },
         }
         const sort = sortMap[sortBy] || sortMap.createdAt
 
@@ -87,12 +86,30 @@ export const getBuyerTasks = async (req, res) => {
 }
 
 // GET /api/tasks/buyer-stats/:email
+// ✅ FIXED: totalPaid now correctly sums what was actually spent
 export const getBuyerStats = async (req, res) => {
     try {
         const tasks = await Task.find({ Buyer_email: req.params.email })
+
         const taskCount = tasks.length
+
+        // pending = sum of remaining required_workers (not yet completed)
         const pendingWorkers = tasks.reduce((s, t) => s + t.required_workers, 0)
-        const totalPaid = tasks.reduce((s, t) => s + (t.payable_amount * 0), 0)
+
+        // totalPaid = total coins already spent on completed slots
+        // Each task started with some original required_workers; we don't store that,
+        // so we fetch from Payment collection instead.
+        // Simpler reliable approach: use actual Payment records (handled in adminController)
+        // Here we compute an estimate from tasks: (original_workers - remaining) * payable_amount
+        // Since we don't store original_workers, we query submissions for this buyer.
+        const Submission = (await import('../models/Submission.js')).default
+        const approvedSubs = await Submission.find({
+            Buyer_email: req.params.email,
+            status: 'approved',
+        }).select('payable_amount')
+
+        const totalPaid = approvedSubs.reduce((s, sub) => s + sub.payable_amount, 0)
+
         res.json({ taskCount, pendingWorkers, totalPaid })
     } catch (err) {
         res.status(500).json({ message: err.message })
