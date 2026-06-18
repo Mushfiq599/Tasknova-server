@@ -4,8 +4,8 @@ import {
     getTaskById, getBuyerTasks, getBuyerStats,
     updateTask, deleteTask,
 } from '../controllers/taskController.js'
-import verifyToken from '../middleware/verifyToken.js'
-import { verifyAdmin, verifyBuyer } from '../middleware/verifyRole.js'
+import verifyToken from '../middleware/VerifyToken.js'
+import { verifyAdmin , verifyBuyer } from '../middleware/VerifyRole.js'
 
 const router = express.Router()
 

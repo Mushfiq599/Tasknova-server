@@ -4,8 +4,8 @@ import {
     getUserCoins, getTopWorkers,
     updateUserRole, deleteUser,
 } from '../controllers/userController.js'
-import verifyToken from '../middleware/verifyToken.js'
-import { verifyAdmin } from '../middleware/verifyRole.js'
+import verifyToken from '../middleware/VerifyToken.js'
+import { verifyAdmin } from '../middleware/VerifyRole.js'
 
 const router = express.Router()
 

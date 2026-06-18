@@ -1,6 +1,7 @@
 import express from 'express'
 import { createPayment, getPaymentHistory } from '../controllers/paymentController.js'
-import verifyToken from '../middleware/verifyToken.js'
+import verifyToken from '../middleware/VerifyToken.js'
+
 
 const router = express.Router()
 

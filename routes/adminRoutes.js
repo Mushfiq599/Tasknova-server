@@ -1,7 +1,7 @@
 import express from 'express'
 import { getAdminStats } from '../controllers/adminController.js'
-import verifyToken from '../middleware/verifyToken.js'
-import { verifyAdmin } from '../middleware/verifyRole.js'
+import verifyToken from '../middleware/VerifyToken.js'
+import { verifyAdmin } from '../middleware/VerifyRole.js'
 
 const router = express.Router()
 

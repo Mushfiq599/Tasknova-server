@@ -5,7 +5,8 @@ import {
     getBuyerPendingSubmissions,
     approveSubmission, rejectSubmission,
 } from '../controllers/submissionController.js'
-import verifyToken from '../middleware/verifyToken.js'
+import verifyToken from '../middleware/VerifyToken.js'
+
 
 const router = express.Router()
 
